@@ -99,12 +99,13 @@ func RunCLI() {
 	}
 
 	if wc.countBytes {
-		fmt.Println(wc.CountBytes())
+		bytes, err := wc.CountBytes()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintln(os.Stdout, bytes)
 	} else {
 		fmt.Println("only char count is supported")
 	}
-}
-
-func main() {
-	RunCLI()
 }
