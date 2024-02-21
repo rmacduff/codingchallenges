@@ -42,8 +42,6 @@ func TestCountLines(t *testing.T) {
 		t.Errorf("got %d; want %d", got, want)
 	}
 }
-<<<<<<< Updated upstream
-=======
 
 func TestCountWords(t *testing.T) {
 	t.Parallel()
@@ -82,4 +80,3 @@ func TestCountChars(t *testing.T) {
 		t.Errorf("got %d; want %d", got, want)
 	}
 }
->>>>>>> Stashed changes
