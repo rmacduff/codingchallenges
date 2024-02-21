@@ -14,6 +14,7 @@ type WordCount struct {
 	output     io.Writer
 	countBytes bool
 	countLines bool
+	countWords bool
 }
 
 type option func(*WordCount) error
@@ -43,6 +44,7 @@ func FromArgs(args []string) option {
 		fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 		countBytes := fset.Bool("c", false, "count bytes")
 		countLines := fset.Bool("l", false, "count lines")
+		countWords := fset.Bool("w", false, "count words")
 		fset.SetOutput(wc.output)
 		err := fset.Parse(args)
 		if err != nil {
@@ -50,6 +52,7 @@ func FromArgs(args []string) option {
 		}
 		wc.countBytes = *countBytes
 		wc.countLines = *countLines
+		wc.countWords = *countWords
 
 		args = fset.Args()
 		if len(args) < 1 {
@@ -103,6 +106,18 @@ func (wc WordCount) CountLines() (int, error) {
 	return lines, nil
 }
 
+func (wc WordCount) CountWords() (int, error) {
+	words := 0
+	scanner := bufio.NewScanner(wc.input)
+	scanner.Split(bufio.ScanWords)
+	for scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return words, err
+		}
+		words++
+	}
+	return words, nil
+}
 func RunCLI() {
 	wc, err := New(
 		FromArgs(os.Args[1:]),
@@ -126,6 +141,13 @@ func RunCLI() {
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stdout, "%8d %s\n", lines, wc.input.(*os.File).Name())
+	} else if wc.countWords {
+		words, err := wc.CountWords()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(os.Stdout, "%8d %s\n", words, wc.input.(*os.File).Name())
 	} else {
 		fmt.Println("unsupported option")
 	}
