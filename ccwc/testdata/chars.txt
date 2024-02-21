@@ -1,0 +1,6 @@
+This is some test data with non-8-byte characters:
+Ω
+€
+©
+日本語
+🙂

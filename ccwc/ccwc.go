@@ -14,6 +14,11 @@ type WordCount struct {
 	output     io.Writer
 	countBytes bool
 	countLines bool
+<<<<<<< Updated upstream
+=======
+	countWords bool
+	countChars bool
+>>>>>>> Stashed changes
 }
 
 type option func(*WordCount) error
@@ -43,6 +48,11 @@ func FromArgs(args []string) option {
 		fset := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 		countBytes := fset.Bool("c", false, "count bytes")
 		countLines := fset.Bool("l", false, "count lines")
+<<<<<<< Updated upstream
+=======
+		countWords := fset.Bool("w", false, "count words")
+		countChars := fset.Bool("m", false, "count chars")
+>>>>>>> Stashed changes
 		fset.SetOutput(wc.output)
 		err := fset.Parse(args)
 		if err != nil {
@@ -50,6 +60,11 @@ func FromArgs(args []string) option {
 		}
 		wc.countBytes = *countBytes
 		wc.countLines = *countLines
+<<<<<<< Updated upstream
+=======
+		wc.countWords = *countWords
+		wc.countChars = *countChars
+>>>>>>> Stashed changes
 
 		args = fset.Args()
 		if len(args) < 1 {
@@ -103,6 +118,35 @@ func (wc WordCount) CountLines() (int, error) {
 	return lines, nil
 }
 
+<<<<<<< Updated upstream
+=======
+func (wc WordCount) CountWords() (int, error) {
+	words := 0
+	scanner := bufio.NewScanner(wc.input)
+	scanner.Split(bufio.ScanWords)
+	for scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return words, err
+		}
+		words++
+	}
+	return words, nil
+}
+
+func (wc WordCount) CountChars() (int, error) {
+	chars := 0
+	scanner := bufio.NewScanner(wc.input)
+	scanner.Split(bufio.ScanRunes)
+	for scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return chars, err
+		}
+		chars++
+	}
+	return chars, nil
+}
+
+>>>>>>> Stashed changes
 func RunCLI() {
 	wc, err := New(
 		FromArgs(os.Args[1:]),
@@ -112,21 +156,40 @@ func RunCLI() {
 		os.Exit(1)
 	}
 
-	if wc.countBytes {
+	switch {
+	case wc.countBytes:
 		bytes, err := wc.CountBytes()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stdout, "%8d %s\n", bytes, wc.input.(*os.File).Name())
-	} else if wc.countLines {
+	case wc.countLines:
 		lines, err := wc.CountLines()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stdout, "%8d %s\n", lines, wc.input.(*os.File).Name())
+<<<<<<< Updated upstream
 	} else {
+=======
+	case wc.countWords:
+		words, err := wc.CountWords()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(os.Stdout, "%8d %s\n", words, wc.input.(*os.File).Name())
+	case wc.countChars:
+		chars, err := wc.CountChars()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(os.Stdout, "%8d %s\n", chars, wc.input.(*os.File).Name())
+	default:
+>>>>>>> Stashed changes
 		fmt.Println("unsupported option")
 	}
 }
