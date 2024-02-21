@@ -61,3 +61,22 @@ func TestCountWords(t *testing.T) {
 		t.Errorf("got %d; want %d", got, want)
 	}
 }
+
+func TestCountChars(t *testing.T) {
+	t.Parallel()
+
+	args := []string{"-w", "testdata/chars.txt"}
+	wc, err := ccwc.New(ccwc.FromArgs(args))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := 62
+
+	got, err := wc.CountChars()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != want {
+		t.Errorf("got %d; want %d", got, want)
+	}
+}

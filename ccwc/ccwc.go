@@ -15,6 +15,7 @@ type WordCount struct {
 	countBytes bool
 	countLines bool
 	countWords bool
+	countChars bool
 }
 
 type option func(*WordCount) error
@@ -45,6 +46,7 @@ func FromArgs(args []string) option {
 		countBytes := fset.Bool("c", false, "count bytes")
 		countLines := fset.Bool("l", false, "count lines")
 		countWords := fset.Bool("w", false, "count words")
+		countChars := fset.Bool("m", false, "count chars")
 		fset.SetOutput(wc.output)
 		err := fset.Parse(args)
 		if err != nil {
@@ -53,6 +55,7 @@ func FromArgs(args []string) option {
 		wc.countBytes = *countBytes
 		wc.countLines = *countLines
 		wc.countWords = *countWords
+		wc.countChars = *countChars
 
 		args = fset.Args()
 		if len(args) < 1 {
@@ -118,6 +121,20 @@ func (wc WordCount) CountWords() (int, error) {
 	}
 	return words, nil
 }
+
+func (wc WordCount) CountChars() (int, error) {
+	chars := 0
+	scanner := bufio.NewScanner(wc.input)
+	scanner.Split(bufio.ScanRunes)
+	for scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			return chars, err
+		}
+		chars++
+	}
+	return chars, nil
+}
+
 func RunCLI() {
 	wc, err := New(
 		FromArgs(os.Args[1:]),
@@ -127,28 +144,36 @@ func RunCLI() {
 		os.Exit(1)
 	}
 
-	if wc.countBytes {
+	switch {
+	case wc.countBytes:
 		bytes, err := wc.CountBytes()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stdout, "%8d %s\n", bytes, wc.input.(*os.File).Name())
-	} else if wc.countLines {
+	case wc.countLines:
 		lines, err := wc.CountLines()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stdout, "%8d %s\n", lines, wc.input.(*os.File).Name())
-	} else if wc.countWords {
+	case wc.countWords:
 		words, err := wc.CountWords()
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
 		fmt.Fprintf(os.Stdout, "%8d %s\n", words, wc.input.(*os.File).Name())
-	} else {
+	case wc.countChars:
+		chars, err := wc.CountChars()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Fprintf(os.Stdout, "%8d %s\n", chars, wc.input.(*os.File).Name())
+	default:
 		fmt.Println("unsupported option")
 	}
 }
